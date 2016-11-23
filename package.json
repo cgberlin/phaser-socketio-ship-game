@@ -1,0 +1,20 @@
+{
+  "name": "phaser-ship-game",
+  "version": "1.0.0",
+  "description": "a game made using phaser and socketio",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "keywords": [
+    "socketio phaser game ship"
+  ],
+  "author": "cody berlin",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.0",
+    "nodemon": "^1.11.0",
+    "phaser": "^2.6.2",
+    "socket.io": "^1.4.8"
+  }
+}
