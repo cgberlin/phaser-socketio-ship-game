@@ -4,39 +4,60 @@ var winW = window.innerWidth;
 
 
 function preload() {
-  game.load.image('bg', 'http://i.imgur.com/IqhJZmI.jpg');
-  game.load.image('ship1', '../assets/ship/Ships/ship1/1stship_3.png');
+  game.load.image('starfield', 'https://raw.githubusercontent.com/jschomay/phaser-demo-game/master/assets/starfield.png');
+  game.load.image('ship1', '../assets/ship.png');
+  game.load.image('bullet', '../assets/bullet.png');
 }
 
 var sprite;
 var text;
-var game = new Phaser.Game(winW, winH, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(1920, 1920, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
 function create() {
 
-    bg = game.add.tileSprite(0,0, game.width, game.height, 'bg');
-    bg.tileScale.x=0.5;
-    bg.tileScale.y=0.5;
-    ship1 = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');
+    starfield = game.add.tileSprite(0, 0, 4000, 4000, 'starfield');
+   
+    game.world.setBounds(0, 0, 4000, 4000);
+
+    ship1 = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
     game.physics.enable(ship1, Phaser.Physics.ARCADE);
+
+    game.camera.x=game.world.width;
+    game.camera.y=game.world.height;
+    game.camera.follow(ship1);
+
+   	bullets = game.add.group();
+    bullets.enableBody = true;
+    bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    bullets.createMultiple(30, 'bullet');
+    bullets.setAll('anchor.x', 0.5);
+    bullets.setAll('anchor.y', 1);
+    bullets.setAll('outOfBoundsKill', true);
+    bullets.setAll('checkWorldBounds', true);
+
 
 }
 
 function update() {
-	bg.tilePosition.x--;
-	    //  only move when you click
-    if (game.input.mousePointer.isDown)
-    {
-        //  400 is the speed it will move towards the mouse
-        game.physics.arcade.moveToPointer(ship1, 400);
+        
+        if (game.input.activePointer.isDown) {
+       		 game.physics.arcade.moveToPointer(ship1, 300);
+       		 fire();
+       	}
+       	else {
+       		ship1.body.velocity.setTo(0, 0);
+       	}
 
-        //  if it's overlapping the mouse, don't move any more
-        if (Phaser.Rectangle.contains(ship1.body, game.input.x, game.input.y))
-        {
-            ship1.body.velocity.setTo(0, 0);
-        }
-    }
-    else
-    {
-        ship1.body.velocity.setTo(0, 0);
-    }
+
+        ship1.rotation = game.physics.arcade.angleToPointer(ship1);
+    
+}
+
+function fire() {
+	var bullet = bullets.getFirstExists(false);
+
+	if(bullet) {
+		bullet.reset(ship1.x, ship1.y +8);
+		bullet.rotation = game.physics.arcade.angleToPointer(bullet);
+		game.physics.arcade.moveToPointer(bullet, 400);
+	}
 }
