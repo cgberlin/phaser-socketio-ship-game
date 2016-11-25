@@ -5,8 +5,9 @@ var winW = window.innerWidth;
 
 function preload() {
   game.load.image('starfield', 'https://raw.githubusercontent.com/jschomay/phaser-demo-game/master/assets/starfield.png');
-  game.load.image('ship1', '../assets/ship.png');
+  game.load.image('ship1', '../assets/ship1.png');
   game.load.image('bullet', '../assets/bullet.png');
+  game.load.image('asteroidMed', '../assets/asteroid-medium.png')
 }
 
 var sprite;
@@ -17,6 +18,21 @@ function create() {
     starfield = game.add.tileSprite(0, 0, 4000, 4000, 'starfield');
    
     game.world.setBounds(0, 0, 4000, 4000);
+
+    asteroids = game.add.group();
+    asteroids.enableBody = true;
+    asteroids.physicsBodyType = Phaser.Physics.ARCADE;
+    var numberOfAsteroids = game.rnd.integerInRange(150, 200);
+    for (var i = 0; i < numberOfAsteroids; i++){
+    	var asteroid = asteroids.create(game.rnd.integerInRange(30, game.world.width), game.rnd.integerInRange(30, game.world.height), 'asteroidMed');
+        asteroid.anchor.set(0.5, 0.5);
+        asteroid.body.angularVelocity = game.rnd.integerInRange(50, 150);
+ 
+	    var randomAngle = game.math.degToRad(game.rnd.angle());
+	    var randomVelocity = game.rnd.integerInRange(50, 150);
+	 
+	    game.physics.arcade.velocityFromRotation(randomAngle, randomVelocity, asteroid.body.velocity);
+    }
 
     ship1 = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
     game.physics.enable(ship1, Phaser.Physics.ARCADE);
@@ -34,7 +50,6 @@ function create() {
     bullets.setAll('outOfBoundsKill', true);
     bullets.setAll('checkWorldBounds', true);
 
-
 }
 
 function update() {
@@ -49,6 +64,8 @@ function update() {
 
 
         ship1.rotation = game.physics.arcade.angleToPointer(ship1);
+
+       
     
 }
 
@@ -60,4 +77,9 @@ function fire() {
 		bullet.rotation = game.physics.arcade.angleToPointer(bullet);
 		game.physics.arcade.moveToPointer(bullet, 400);
 	}
+}
+
+
+function hitAsteroid() {
+	ship1.kill();
 }
