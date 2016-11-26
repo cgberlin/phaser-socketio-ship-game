@@ -30,12 +30,16 @@ function create() {
  
 	    var randomAngle = game.math.degToRad(game.rnd.angle());
 	    var randomVelocity = game.rnd.integerInRange(50, 150);
-	 
+	 	
 	    game.physics.arcade.velocityFromRotation(randomAngle, randomVelocity, asteroid.body.velocity);
+   		asteroid.body.collideWorldBounds = true;
+   		asteroid.body.bounce.setTo(0.9, 0.9);
     }
 
     ship1 = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
     game.physics.enable(ship1, Phaser.Physics.ARCADE);
+    ship1.enableBody=true;
+ 
 
     game.camera.x=game.world.width;
     game.camera.y=game.world.height;
@@ -49,6 +53,7 @@ function create() {
     bullets.setAll('anchor.y', 1);
     bullets.setAll('outOfBoundsKill', true);
     bullets.setAll('checkWorldBounds', true);
+
 
 }
 
@@ -65,6 +70,10 @@ function update() {
 
         ship1.rotation = game.physics.arcade.angleToPointer(ship1);
 
+        game.physics.arcade.collide(asteroids);
+
+        game.physics.arcade.overlap(bullets, asteroids, bulletHitAsteroid, null, this);
+        game.physics.arcade.overlap(ship1, asteroids, shipHitAsteroid, null, this);
        
     
 }
@@ -80,6 +89,13 @@ function fire() {
 }
 
 
-function hitAsteroid() {
+function shipHitAsteroid() {
+	alert('game over');
 	ship1.kill();
+	game.state.restart();
+}
+
+function bulletHitAsteroid(bullet, asteroid) {
+	bullet.kill();
+	asteroid.kill();
 }
