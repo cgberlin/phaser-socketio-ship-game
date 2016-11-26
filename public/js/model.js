@@ -1,7 +1,9 @@
 
 var winH = (window.innerHeight);
 var winW = window.innerWidth;
+var socket = io();
 
+var shipPosition;
 
 function preload() {
   game.load.image('starfield', 'https://raw.githubusercontent.com/jschomay/phaser-demo-game/master/assets/starfield.png');
@@ -39,7 +41,6 @@ function create() {
     ship1 = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
     game.physics.enable(ship1, Phaser.Physics.ARCADE);
     ship1.enableBody=true;
- 
 
     game.camera.x=game.world.width;
     game.camera.y=game.world.height;
@@ -57,7 +58,10 @@ function create() {
 
 }
 
+
 function update() {
+		shipPosition = ship1.position;
+		socket.emit('enemyMove', shipPosition);
         
         if (game.input.activePointer.isDown) {
        		 game.physics.arcade.moveToPointer(ship1, 300);
@@ -66,7 +70,6 @@ function update() {
        	else {
        		ship1.body.velocity.setTo(0, 0);
        	}
-
 
         ship1.rotation = game.physics.arcade.angleToPointer(ship1);
 
@@ -99,3 +102,22 @@ function bulletHitAsteroid(bullet, asteroid) {
 	bullet.kill();
 	asteroid.kill();
 }
+
+socket.on('updateEnemyMove', function(enemyLocation){
+		enemyShip.position.x = enemyLocation.x;
+		enemyShip.position.y = enemyLocation.y;
+});
+
+socket.on('newEnemy', function(){
+	console.log('new enemy');
+	enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
+    game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
+    enemyShip.enableBody=true;
+    socket.emit('playerMove', shipPosition);
+});
+
+socket.on('yourEnemyIfNewConnect', function(location){
+	enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
+    game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
+    enemyShip.enableBody=true;
+});
