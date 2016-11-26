@@ -88,6 +88,7 @@ function update() {
         game.physics.arcade.overlap(bullets, asteroids, bulletHitAsteroid, null, this);
         game.physics.arcade.overlap(ship1, asteroids, shipHitAsteroid, null, this);
         game.physics.arcade.overlap(enemyBullets, ship1, enemyKilledYou, null, this);
+
         
 }
 
@@ -124,9 +125,12 @@ function bulletHitAsteroid(bullet, asteroid) {
 function enemyKilledYou(){
 	alert('enemy got you bae');
 	game.state.restart();
-	socket.emit('playerMove');
-	createEnemyShip();
-};
+	
+}
+
+function youKilledEnemy() {
+	
+}
 
 socket.on('updateEnemyMove', function(enemyLocation){
 		enemyShip.position.x = enemyLocation.position.x;
@@ -154,4 +158,5 @@ function createEnemyShip() {
 	enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
     game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
     enemyShip.enableBody=true;
+    
 }
