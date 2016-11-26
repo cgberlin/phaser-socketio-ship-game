@@ -61,7 +61,11 @@ function create() {
 
 function update() {
 		shipPosition = ship1.position;
-		socket.emit('enemyMove', shipPosition);
+		locationData = {
+			position : ship1.position,
+			angle : ship1.angle
+		}
+		socket.emit('enemyMove', locationData);
         
         if (game.input.activePointer.isDown) {
        		 game.physics.arcade.moveToPointer(ship1, 300);
@@ -82,20 +86,28 @@ function update() {
 }
 
 function fire() {
+
 	var bullet = bullets.getFirstExists(false);
 
 	if(bullet) {
-		bullet.reset(ship1.x, ship1.y +8);
+		bullet.reset(ship1.x, ship1.y +4);
 		bullet.rotation = game.physics.arcade.angleToPointer(bullet);
 		game.physics.arcade.moveToPointer(bullet, 400);
+		bulletLocationInfo = {
+			position : bullet.position,
+			angle : bullet.angle,
+			velocity : bullet.body.velocity,
+			rotation : bullet.rotation
+		}
+		socket.emit('myBullets', bulletLocationInfo);
 	}
 }
 
 
 function shipHitAsteroid() {
-	alert('game over');
-	ship1.kill();
-	game.state.restart();
+	//alert('game over');
+	//ship1.kill();
+	//game.state.restart();
 }
 
 function bulletHitAsteroid(bullet, asteroid) {
@@ -104,20 +116,32 @@ function bulletHitAsteroid(bullet, asteroid) {
 }
 
 socket.on('updateEnemyMove', function(enemyLocation){
-		enemyShip.position.x = enemyLocation.x;
-		enemyShip.position.y = enemyLocation.y;
+		enemyShip.position.x = enemyLocation.position.x;
+		enemyShip.position.y = enemyLocation.position.y;
+		enemyShip.angle = enemyLocation.angle;
 });
 
 socket.on('newEnemy', function(){
-	console.log('new enemy');
-	enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
-    game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
-    enemyShip.enableBody=true;
-    socket.emit('playerMove', shipPosition);
+	createEnemyShip();
+    socket.emit('playerMove');
 });
 
-socket.on('yourEnemyIfNewConnect', function(location){
+socket.on('yourEnemyIfNewConnect', function(){
+	createEnemyShip();
+});
+
+socket.on('enemyBullets', function(bulletLocationInfo){
+	var enemyBullet = game.add.sprite(bulletLocationInfo.position.x, bulletLocationInfo.position.y, 'bullet');
+	enemyBullet.anchor.setTo(0.5, 0.5);
+    game.physics.enable(enemyBullet, Phaser.Physics.ARCADE);
+    enemyBullet.enableBody = true;
+	enemyBullet.angle = bulletLocationInfo.angle;
+	enemyBullet.body.velocity.x = bulletLocationInfo.velocity.x;
+	enemyBullet.body.velocity.y = bulletLocationInfo.velocity.y;
+});
+
+function createEnemyShip() {
 	enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
     game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
     enemyShip.enableBody=true;
-});
+}
