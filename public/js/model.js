@@ -55,9 +55,15 @@ function create() {
     bullets.setAll('outOfBoundsKill', true);
     bullets.setAll('checkWorldBounds', true);
 
+    enemyBullets = game.add.group();
+    enemyBullets.enableBody = true;
+    enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
+    enemyBullets.setAll('anchor.x', 0.5);
+    enemyBullets.setAll('anchor.y', 1);
+    enemyBullets.setAll('outOfBoundsKill', true);
+    enemyBullets.setAll('checkWorldBounds', true);
 
 }
-
 
 function update() {
 		shipPosition = ship1.position;
@@ -81,8 +87,7 @@ function update() {
 
         game.physics.arcade.overlap(bullets, asteroids, bulletHitAsteroid, null, this);
         game.physics.arcade.overlap(ship1, asteroids, shipHitAsteroid, null, this);
-       
-    
+        
 }
 
 function fire() {
@@ -115,6 +120,10 @@ function bulletHitAsteroid(bullet, asteroid) {
 	asteroid.kill();
 }
 
+function enemyKilledYou(){
+	alert('enemy got you bae');
+};
+
 socket.on('updateEnemyMove', function(enemyLocation){
 		enemyShip.position.x = enemyLocation.position.x;
 		enemyShip.position.y = enemyLocation.position.y;
@@ -131,13 +140,11 @@ socket.on('yourEnemyIfNewConnect', function(){
 });
 
 socket.on('enemyBullets', function(bulletLocationInfo){
-	var enemyBullet = game.add.sprite(bulletLocationInfo.position.x, bulletLocationInfo.position.y, 'bullet');
-	enemyBullet.anchor.setTo(0.5, 0.5);
-    game.physics.enable(enemyBullet, Phaser.Physics.ARCADE);
-    enemyBullet.enableBody = true;
+	var enemyBullet = enemyBullets.create(bulletLocationInfo.position.x, bulletLocationInfo.position.y, 'bullet');
 	enemyBullet.angle = bulletLocationInfo.angle;
 	enemyBullet.body.velocity.x = bulletLocationInfo.velocity.x;
 	enemyBullet.body.velocity.y = bulletLocationInfo.velocity.y;
+	game.physics.arcade.overlap(enemyBullet, ship1, enemyKilledYou, null, this);
 });
 
 function createEnemyShip() {
