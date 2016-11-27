@@ -3,12 +3,16 @@ var winH = window.innerHeight;
 var winW = window.innerWidth;
 var socket = io();
 var game,
-	enoughClients = false;
+	enoughClients = false,
+	myScore = 0,
+	enemyScore = 0,
+	scoreText;
 
 $('#start-button').on('click', function(){
 	if (enoughClients){
 		$('#main-menu').hide();
 		game = new Phaser.Game(1920, 1920, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
+		$('#game-menu').show();
 	}
 	else {
 		alert('need 2 clients to play');
@@ -130,6 +134,8 @@ function enemyKilledYou(){
 
 function killedEnemy(){
 	enemyShip.kill();
+	myScore++;
+	$('#my-score').text('My Score: ' + myScore);
 	game.state.restart();
 }
 
