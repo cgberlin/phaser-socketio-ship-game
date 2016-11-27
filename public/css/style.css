@@ -1,0 +1,14 @@
+*{
+	box-sizing: border-box;
+}
+#main-menu {
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+	justify-content: space-around;
+}
+button {
+	margin: 2rem;
+	background-color:red;
+	color: white;
+}
