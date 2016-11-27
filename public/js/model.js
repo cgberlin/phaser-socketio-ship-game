@@ -1,7 +1,19 @@
 
-var winH = (window.innerHeight);
+var winH = window.innerHeight;
 var winW = window.innerWidth;
 var socket = io();
+var game,
+	enoughClients = false;
+
+$('#start-button').on('click', function(){
+	if (enoughClients){
+		$('#main-menu').hide();
+		game = new Phaser.Game(1920, 1920, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
+	}
+	else {
+		alert('need 2 clients to play');
+	}
+});
 
 var shipPosition;
 
@@ -9,12 +21,12 @@ function preload() {
   game.load.image('starfield', 'https://raw.githubusercontent.com/jschomay/phaser-demo-game/master/assets/starfield.png');
   game.load.image('ship1', '../assets/ship1.png');
   game.load.image('bullet', '../assets/bullet.png');
-  game.load.image('asteroidMed', '../assets/asteroid-medium.png')
+  game.load.image('asteroidMed', '../assets/asteroid-medium.png');
 }
 
-var sprite;
-var text;
-var game = new Phaser.Game(1920, 1920, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
+var sprite,
+	text;
+
 function create() {
 
     starfield = game.add.tileSprite(0, 0, 4000, 4000, 'starfield');
@@ -24,27 +36,18 @@ function create() {
     asteroids = game.add.group();
     asteroids.enableBody = true;
     asteroids.physicsBodyType = Phaser.Physics.ARCADE;
-    var numberOfAsteroids = game.rnd.integerInRange(150, 200);
-    for (var i = 0; i < numberOfAsteroids; i++){
-    	var asteroid = asteroids.create(game.rnd.integerInRange(30, game.world.width), game.rnd.integerInRange(30, game.world.height), 'asteroidMed');
-        asteroid.anchor.set(0.5, 0.5);
-        asteroid.body.angularVelocity = game.rnd.integerInRange(50, 150);
- 
-	    var randomAngle = game.math.degToRad(game.rnd.angle());
-	    var randomVelocity = game.rnd.integerInRange(50, 150);
-	 	
-	    game.physics.arcade.velocityFromRotation(randomAngle, randomVelocity, asteroid.body.velocity);
-   		asteroid.body.collideWorldBounds = true;
-   		asteroid.body.bounce.setTo(0.9, 0.9);
-    }
 
-    ship1 = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
+    ship1 = game.add.sprite(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height) , 'ship1');    
     game.physics.enable(ship1, Phaser.Physics.ARCADE);
     ship1.enableBody=true;
+    ship1.body.drag.x = 200;
+    ship1.body.drag.y = 200;
 
-    game.camera.x=game.world.width;
-    game.camera.y=game.world.height;
-    game.camera.follow(ship1);
+    enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
+    game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
+    enemyShip.enableBody=true;
+
+    game.camera.follow(ship1,Phaser.Camera.FOLLOW_LOCKON);
 
    	bullets = game.add.group();
     bullets.enableBody = true;
@@ -62,7 +65,7 @@ function create() {
     enemyBullets.setAll('anchor.y', 1);
     enemyBullets.setAll('outOfBoundsKill', true);
     enemyBullets.setAll('checkWorldBounds', true);
-
+    socket.emit('SendOverTheAsteroidData');
 }
 
 function update() {
@@ -71,14 +74,13 @@ function update() {
 			position : ship1.position,
 			angle : ship1.angle
 		}
-		socket.emit('enemyMove', locationData);
-        
         if (game.input.activePointer.isDown) {
        		 game.physics.arcade.moveToPointer(ship1, 300);
+       		 socket.emit('enemyMove', locationData);
        		 fire();
        	}
-       	else {
-       		ship1.body.velocity.setTo(0, 0);
+       	else if(ship1.body.velocity > 0){
+       		ship1.body.velocity--;
        	}
 
         ship1.rotation = game.physics.arcade.angleToPointer(ship1);
@@ -88,7 +90,7 @@ function update() {
         game.physics.arcade.overlap(bullets, asteroids, bulletHitAsteroid, null, this);
         game.physics.arcade.overlap(ship1, asteroids, shipHitAsteroid, null, this);
         game.physics.arcade.overlap(enemyBullets, ship1, enemyKilledYou, null, this);
-        
+        game.physics.arcade.overlap(bullets, enemyShip, killedEnemy, null, this);
 }
 
 function fire() {
@@ -122,8 +124,15 @@ function bulletHitAsteroid(bullet, asteroid) {
 }
 
 function enemyKilledYou(){
-	alert('enemy got you bae');
-};
+	ship1.kill();
+	game.state.restart();
+}
+
+function killedEnemy(){
+	enemyShip.kill();
+	game.state.restart();
+}
+
 
 socket.on('updateEnemyMove', function(enemyLocation){
 		enemyShip.position.x = enemyLocation.position.x;
@@ -131,14 +140,6 @@ socket.on('updateEnemyMove', function(enemyLocation){
 		enemyShip.angle = enemyLocation.angle;
 });
 
-socket.on('newEnemy', function(){
-	createEnemyShip();
-    socket.emit('playerMove');
-});
-
-socket.on('yourEnemyIfNewConnect', function(){
-	createEnemyShip();
-});
 
 socket.on('enemyBullets', function(bulletLocationInfo){
 	var enemyBullet = enemyBullets.create(bulletLocationInfo.position.x, bulletLocationInfo.position.y, 'bullet');
@@ -147,8 +148,26 @@ socket.on('enemyBullets', function(bulletLocationInfo){
 	enemyBullet.body.velocity.y = bulletLocationInfo.velocity.y;
 });
 
-function createEnemyShip() {
-	enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
-    game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
-    enemyShip.enableBody=true;
-}
+socket.on('sendAsteroidData', function(data){
+	console.log(data);
+	var numberOfAsteroids = data.numberOfAsteroids;
+	               //timeout must be here to give it time to load the data from websocket
+    for (var i = 0; i < numberOfAsteroids; i++){
+    	var asteroid = asteroids.create(data.locationValues[i].x, data.locationValues[i].y, 'asteroidMed');
+        asteroid.anchor.set(0.5, 0.5);
+        asteroid.body.angularVelocity = data.angularVelocities[i];
+ 
+	    var randomAngle = game.math.degToRad(data.angles[i]);
+	    var randomVelocity = data.randomVelocities[i];
+	 	
+	    game.physics.arcade.velocityFromRotation(randomAngle, randomVelocity, asteroid.body.velocity);
+   		asteroid.body.collideWorldBounds = true;
+   		asteroid.body.bounce.setTo(0.9, 0.9);
+    }
+  
+});
+
+socket.on('GoodToGo', function(){
+	enoughClients = true;
+});
+
