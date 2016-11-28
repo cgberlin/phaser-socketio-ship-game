@@ -5,7 +5,6 @@ var mongoose = require('mongoose');
 var HighScore = require('./models/high-score');
 var app = express();
 var config = require('./config');
-app.use(express.static('public'));
 
 var server = http.Server(app);
 var io = socket_io(server);
@@ -78,7 +77,7 @@ var runServer = function(callback) {    //connects to the mongodb
             return callback(err);
         }
 
-        app.listen(config.PORT, function() {
+        server.listen(config.PORT, function() {
             console.log('Listening on localhost:' + config.PORT);
             if (callback) {
                 callback();
