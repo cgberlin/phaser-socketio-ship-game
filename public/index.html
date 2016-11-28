@@ -6,17 +6,19 @@
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
       <link rel="stylesheet" type="text/css" href="css/normalize.css">
       <link rel="stylesheet" type="text/css" href="css/style.css">
+      <link href="https://fonts.googleapis.com/css?family=Bungee" rel="stylesheet">
     </head>
 
     <body>
       <div id = "main-menu">
         <h1>2 Player Phaser Ship Game</h1>
+        <input id = "name" type = "text" placeholder="Enter Name to Play"/>
         <button id = "start-button">START</button>
         <button id = "high-scores">HIGH SCORES</button>
         <button id = "instructions">INSTRUCTIONS</button>
       </div>
       <div id = "game-menu">
-        <h3 id = "my-score">My Score: 0</h3>
+        <h3 id = "my-score">My Score: 0 <br/>Enemy Score: 0</h3>
       </div>
       <div id = "phaser"></div>
       <script src="/socket.io/socket.io.js"></script>

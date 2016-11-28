@@ -6,16 +6,18 @@ var game,
 	enoughClients = false,
 	myScore = 0,
 	enemyScore = 0,
-	scoreText;
+	scoreText,
+	myName;
 
 $('#start-button').on('click', function(){
-	if (enoughClients){
+	if (enoughClients && ($('#name').val() != '')){
+		myName = $('#name').val();
 		$('#main-menu').hide();
 		game = new Phaser.Game(1920, 1920, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
 		$('#game-menu').show();
 	}
 	else {
-		alert('need 2 clients to play');
+		alert('need 2 clients and a name to play');
 	}
 });
 
@@ -115,11 +117,15 @@ function fire() {
 	}
 }
 
+function randomReset(WhatKind){
+	WhatKind.reset(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height));
+}
+
 
 function shipHitAsteroid() {
-	//alert('game over');
-	//ship1.kill();
-	//game.state.restart();
+	myScore--;
+	updateScore();
+	randomReset(ship1);
 }
 
 function bulletHitAsteroid(bullet, asteroid) {
@@ -128,36 +134,35 @@ function bulletHitAsteroid(bullet, asteroid) {
 }
 
 function enemyKilledYou(){
-	ship1.kill();
-	game.state.restart();
+	randomReset(ship1);
+	enemyScore++;
+	updateScore();
 }
 
 function killedEnemy(){
-	enemyShip.kill();
+	randomReset(enemyShip);
 	myScore++;
-	$('#my-score').text('My Score: ' + myScore);
-	game.state.restart();
+	updateScore();
 }
 
+function updateScore(){
+	$('#my-score').html('My Score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
+}
 
 socket.on('updateEnemyMove', function(enemyLocation){
 		enemyShip.position.x = enemyLocation.position.x;
 		enemyShip.position.y = enemyLocation.position.y;
 		enemyShip.angle = enemyLocation.angle;
 });
-
-
 socket.on('enemyBullets', function(bulletLocationInfo){
 	var enemyBullet = enemyBullets.create(bulletLocationInfo.position.x, bulletLocationInfo.position.y, 'bullet');
 	enemyBullet.angle = bulletLocationInfo.angle;
 	enemyBullet.body.velocity.x = bulletLocationInfo.velocity.x;
 	enemyBullet.body.velocity.y = bulletLocationInfo.velocity.y;
 });
-
 socket.on('sendAsteroidData', function(data){
 	console.log(data);
 	var numberOfAsteroids = data.numberOfAsteroids;
-	               //timeout must be here to give it time to load the data from websocket
     for (var i = 0; i < numberOfAsteroids; i++){
     	var asteroid = asteroids.create(data.locationValues[i].x, data.locationValues[i].y, 'asteroidMed');
         asteroid.anchor.set(0.5, 0.5);
@@ -170,9 +175,7 @@ socket.on('sendAsteroidData', function(data){
    		asteroid.body.collideWorldBounds = true;
    		asteroid.body.bounce.setTo(0.9, 0.9);
     }
-  
 });
-
 socket.on('GoodToGo', function(){
 	enoughClients = true;
 });
