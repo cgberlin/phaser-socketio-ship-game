@@ -147,6 +147,10 @@ function killedEnemy(){
 
 function updateScore(){
 	$('#my-score').html('My Score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
+	if (myScore === 5){
+		alert('You win!');
+		socket.emit('winner', myName);
+	}
 }
 
 socket.on('updateEnemyMove', function(enemyLocation){

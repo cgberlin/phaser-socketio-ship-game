@@ -1,8 +1,10 @@
 var http = require('http');
 var express = require('express');
 var socket_io = require('socket.io');
-
+var mongoose = require('mongoose');
+var HighScore = require('./models/high-score');
 var app = express();
+var config = require('./config');
 app.use(express.static('public'));
 
 var server = http.Server(app);
@@ -31,6 +33,10 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('disconnect', function() {
   	numberOfClients--;
+  });
+
+  socket.on('winner', function(name){
+  	console.log(name);
   });
 });
 
@@ -66,6 +72,29 @@ function createAsteroidGenerations(){
 	asteroidData.randomVelocities = randomVelocityValues;
 }
 
+var runServer = function(callback) {    //connects to the mongodb
+    mongoose.connect(config.DATABASE_URL, function(err) {
+        if (err && callback) {
+            return callback(err);
+        }
 
-server.listen(process.env.PORT || 8080);
-console.log('launching server on 8080 now!>>>>>>>>>>>');
+        app.listen(config.PORT, function() {
+            console.log('Listening on localhost:' + config.PORT);
+            if (callback) {
+                callback();
+            }
+        });
+    });
+};
+
+if (require.main === module) {
+    runServer(function(err) {
+        if (err) {
+            console.error(err);
+        }
+    });
+};
+
+exports.app = app;
+exports.runServer = runServer;
+app.use(express.static('public'));
