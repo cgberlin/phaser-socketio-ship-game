@@ -10,15 +10,23 @@ var game,
 	myName;
 
 $('#start-button').on('click', function(){
-	if (enoughClients && ($('#name').val() != '')){
+	if ($('#name').val() != ''){
 		myName = $('#name').val();
 		$('#main-menu').hide();
-		game = new Phaser.Game(1920, 1920, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
-		$('#game-menu').show();
+		$('#waiting-lobby').show();
+		socket.emit('playerReady');
 	}
 	else {
-		alert('need 2 clients and a name to play');
+		alert('need a name to play');
 	}
+});
+
+socket.on('bothReady', function(){
+	setTimeout(function(){
+		$('#waiting-lobby').hide();
+		game = new Phaser.Game(1920, 1920, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
+		$('#game-menu').show();
+	},2000);
 });
 
 var shipPosition;
@@ -165,7 +173,6 @@ socket.on('enemyBullets', function(bulletLocationInfo){
 	enemyBullet.body.velocity.y = bulletLocationInfo.velocity.y;
 });
 socket.on('sendAsteroidData', function(data){
-	console.log(data);
 	var numberOfAsteroids = data.numberOfAsteroids;
     for (var i = 0; i < numberOfAsteroids; i++){
     	var asteroid = asteroids.create(data.locationValues[i].x, data.locationValues[i].y, 'asteroidMed');
@@ -180,7 +187,5 @@ socket.on('sendAsteroidData', function(data){
    		asteroid.body.bounce.setTo(0.9, 0.9);
     }
 });
-socket.on('GoodToGo', function(){
-	enoughClients = true;
-});
+
 

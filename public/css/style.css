@@ -34,7 +34,11 @@ button {
     display: none;
     text-align: center;
 }
-h3 {
+h3, #waiting-lobby {
 	color:white;
 	font-family: 'Bungee', cursive;
+}
+#waiting-lobby {
+	display: none;
+	text-align: center;
 }

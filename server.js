@@ -14,10 +14,6 @@ var asteroidData,
 createAsteroidGenerations();
 
 io.sockets.on('connection', function (socket) {
-  numberOfClients++;
-  if (numberOfClients == 2){
-  	io.emit('GoodToGo');
-  }
   console.log("client connected" + numberOfClients);
   socket.on('SendOverTheAsteroidData', function(){
   	socket.emit('sendAsteroidData', asteroidData);
@@ -31,7 +27,17 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on('disconnect', function() {
-  	numberOfClients--;
+  	if (numberOfClients > 0){
+  		numberOfClients--;
+  	}
+  });
+
+  socket.on('playerReady', function(){
+  	numberOfClients++;
+  	console.log(numberOfClients);
+  	if (numberOfClients == 2){
+  		io.emit('bothReady');
+  	}
   });
 
   socket.on('winner', function(name){
