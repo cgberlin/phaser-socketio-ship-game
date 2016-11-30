@@ -26,7 +26,7 @@ $('#start-button').on('click', function(){
 socket.on('bothReady', function(){
 	setTimeout(function(){
 		$('#waiting-lobby').hide();
-		game = new Phaser.Game(1920, 1920, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
+		game = new Phaser.Game(winW, winH, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
 		$('#game-menu').show();
 		updateScore();
 	},2000);
@@ -86,16 +86,12 @@ function create() {
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
     bullets.createMultiple(30, 'bullet');
-    bullets.setAll('anchor.x', 0.5);
-    bullets.setAll('anchor.y', 1);
     bullets.setAll('outOfBoundsKill', true);
     bullets.setAll('checkWorldBounds', true);
 
     enemyBullets = game.add.group();
     enemyBullets.enableBody = true;
     enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
-    enemyBullets.setAll('anchor.x', 0.5);
-    enemyBullets.setAll('anchor.y', 1);
     enemyBullets.setAll('outOfBoundsKill', true);
     enemyBullets.setAll('checkWorldBounds', true);
     socket.emit('SendOverTheAsteroidData');
@@ -154,7 +150,7 @@ function fire() {
 	var bullet = bullets.getFirstExists(false);
 
 	if(bullet) {
-		bullet.reset(ship1.x, ship1.y +4);
+		bullet.reset(ship1.x - 8, ship1.y - 8);
 		bullet.angle = ship1.angle;
 		if (ship1.body.velocity.x >= 0){
 			bullet.body.velocity.x = (ship1.body.velocity.x + 200);
@@ -207,7 +203,7 @@ function killedEnemy(){
 }
 
 function updateScore(){
-	$('#my-score').html(myName +'s score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
+	$('#my-score').html('My score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
 	if (myScore === 1){
 		alert('You win!');
 		socket.emit('winner', myName);
