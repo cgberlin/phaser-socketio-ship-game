@@ -81,8 +81,6 @@ function create() {
     enemyShip.enableBody=true;
 
     game.camera.follow(ship1,Phaser.Camera.FOLLOW_LOCKON);
-    game.camera.x = ship1.position.x;
-    game.camera.y = ship1.position.y;
 
    	bullets = game.add.group();
     bullets.enableBody = true;

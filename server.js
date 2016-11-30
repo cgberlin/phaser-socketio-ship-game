@@ -2,7 +2,7 @@ var http = require('http');
 var express = require('express');
 var socket_io = require('socket.io');
 var mongoose = require('mongoose');
-var HighScore = require('./models/high-score');
+var HighScores = require('./models/high-score');
 var app = express();
 var config = require('./config');
 
@@ -34,17 +34,22 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('winner', function(nameWinner){
   	var query = {
-  		'username' : nameWinner
+  		name : nameWinner
   	}
-  	HighScore.findOne(query, function(itemFound){
-  		if (!itemFound) {
+  	console.log(nameWinner);
+  	HighScores.find({name : nameWinner}, function(err, highscore) {
+        if (err) {
+            console.log('problem with db');
+        }
+        if (!highscore.length) {
         	console.log("No item found, creating item");
-        	HighScore.create({'username' : nameWinner, 'wins': 1});
+        	HighScores.create({name : nameWinner, 'wins': 1});
     }
-    	else{
-    		console.log("found one" + itemFound.name + itemFound.wins);
-    	}
-  	});
+    	else {
+        	highscore[0].wins += 1;
+        	console.log(highscore);
+    }
+    });
   });	
 
   socket.on('playerReady', function(){
@@ -55,9 +60,6 @@ io.sockets.on('connection', function (socket) {
   	}
   });
 
-  socket.on('winner', function(name){
-  	console.log(name);
-  });
 });
 
 function createAsteroidGenerations(){
