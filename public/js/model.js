@@ -7,7 +7,9 @@ var game,
 	myScore = 0,
 	enemyScore = 0,
 	scoreText,
-	myName;
+	myName,
+	shipsVelocity,
+	newAngle;
 
 $('#start-button').on('click', function(){
 	if ($('#name').val() != ''){
@@ -26,6 +28,7 @@ socket.on('bothReady', function(){
 		$('#waiting-lobby').hide();
 		game = new Phaser.Game(1920, 1920, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
 		$('#game-menu').show();
+		updateScore();
 	},2000);
 });
 
@@ -36,6 +39,7 @@ function preload() {
   game.load.image('ship1', '../assets/ship1.png');
   game.load.image('bullet', '../assets/bullet.png');
   game.load.image('asteroidMed', '../assets/asteroid-medium.png');
+
 }
 
 var sprite,
@@ -47,6 +51,16 @@ function create() {
    
     game.world.setBounds(0, 0, 4000, 4000);
 
+
+    game.input.keyboard.createCursorKeys();
+    wasd = {
+		  up: game.input.keyboard.addKey(Phaser.Keyboard.W),
+		  down: game.input.keyboard.addKey(Phaser.Keyboard.S),
+		  left: game.input.keyboard.addKey(Phaser.Keyboard.A),
+		  right: game.input.keyboard.addKey(Phaser.Keyboard.D),
+		  fire : game.input.keyboard.addKey(Phaser.Keyboard.F)
+		};
+
     asteroids = game.add.group();
     asteroids.enableBody = true;
     asteroids.physicsBodyType = Phaser.Physics.ARCADE;
@@ -54,14 +68,19 @@ function create() {
     ship1 = game.add.sprite(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height) , 'ship1');    
     game.physics.enable(ship1, Phaser.Physics.ARCADE);
     ship1.enableBody=true;
-    ship1.body.drag.x = 200;
-    ship1.body.drag.y = 200;
+    ship1.body.drag.x = 50;
+    ship1.body.drag.y = 50;
+    ship1.body.collideWorldBounds = true;
+
+    
 
     enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
     game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
     enemyShip.enableBody=true;
 
     game.camera.follow(ship1,Phaser.Camera.FOLLOW_LOCKON);
+    game.camera.x = ship1.position.x;
+    game.camera.y = ship1.position.y;
 
    	bullets = game.add.group();
     bullets.enableBody = true;
@@ -80,6 +99,8 @@ function create() {
     enemyBullets.setAll('outOfBoundsKill', true);
     enemyBullets.setAll('checkWorldBounds', true);
     socket.emit('SendOverTheAsteroidData');
+
+
 }
 
 function update() {
@@ -88,23 +109,44 @@ function update() {
 			position : ship1.position,
 			angle : ship1.angle
 		}
-        if (game.input.activePointer.isDown) {
-       		 game.physics.arcade.moveToPointer(ship1, 300);
-       		 socket.emit('enemyMove', locationData);
-       		 fire();
-       	}
-       	else if(ship1.body.velocity > 0){
-       		ship1.body.velocity--;
-       	}
 
-        ship1.rotation = game.physics.arcade.angleToPointer(ship1);
-
+		shipsVelocity = ship1.body.velocity;
         game.physics.arcade.collide(asteroids);
 
         game.physics.arcade.overlap(bullets, asteroids, bulletHitAsteroid, null, this);
         game.physics.arcade.overlap(ship1, asteroids, shipHitAsteroid, null, this);
         game.physics.arcade.overlap(enemyBullets, ship1, enemyKilledYou, null, this);
         game.physics.arcade.overlap(bullets, enemyShip, killedEnemy, null, this);
+
+        wasd.up.onDown.add(function(){
+        	ship1.body.velocity.y = -300;
+        	getAngle();
+        	ship1.angle = newAngle;
+        });
+        wasd.down.onDown.add(function(){
+        	ship1.body.velocity.y = 300;
+        	getAngle();
+        	ship1.angle = newAngle;
+        });
+        wasd.left.onDown.add(function(){
+        	ship1.body.velocity.x = -300;
+        	getAngle();
+        	ship1.angle = newAngle;
+        });
+        wasd.right.onDown.add(function(){
+        	ship1.body.velocity.x = 300;
+        	getAngle();
+        	ship1.angle = newAngle;
+        });
+        wasd.fire.onDown.add(function(){
+        	fire();
+        });
+        socket.emit('enemyMove', locationData);
+}
+
+function getAngle(){
+	newAngle = Math.atan2(shipsVelocity.y, shipsVelocity.x)
+	newAngle = (newAngle * 180 / Math.PI);
 }
 
 function fire() {
@@ -113,8 +155,9 @@ function fire() {
 
 	if(bullet) {
 		bullet.reset(ship1.x, ship1.y +4);
-		bullet.rotation = game.physics.arcade.angleToPointer(bullet);
-		game.physics.arcade.moveToPointer(bullet, 400);
+		bullet.angle = ship1.angle;
+		bullet.body.velocity.x = (ship1.body.velocity.x);
+		bullet.body.velocity.y = (ship1.body.velocity.y);
 		bulletLocationInfo = {
 			position : bullet.position,
 			angle : bullet.angle,
@@ -131,9 +174,9 @@ function randomReset(WhatKind){
 
 
 function shipHitAsteroid() {
-	myScore--;
-	updateScore();
-	randomReset(ship1);
+	//myScore--;
+	//updateScore();
+	//randomReset(ship1);
 }
 
 function bulletHitAsteroid(bullet, asteroid) {
@@ -154,8 +197,8 @@ function killedEnemy(){
 }
 
 function updateScore(){
-	$('#my-score').html('My Score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
-	if (myScore === 5){
+	$('#my-score').html(myName +'s score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
+	if (myScore === 1){
 		alert('You win!');
 		socket.emit('winner', myName);
 	}

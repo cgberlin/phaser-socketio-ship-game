@@ -32,6 +32,21 @@ io.sockets.on('connection', function (socket) {
   	}
   });
 
+  socket.on('winner', function(nameWinner){
+  	var query = {
+  		'username' : nameWinner
+  	}
+  	HighScore.findOne(query, function(itemFound){
+  		if (!itemFound) {
+        	console.log("No item found, creating item");
+        	HighScore.create({'username' : nameWinner, 'wins': 1});
+    }
+    	else{
+    		console.log("found one" + itemFound.name + itemFound.wins);
+    	}
+  	});
+  });	
+
   socket.on('playerReady', function(){
   	numberOfClients++;
   	console.log(numberOfClients);
