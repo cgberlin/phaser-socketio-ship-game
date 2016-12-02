@@ -26,9 +26,19 @@ $('#instructions-button').on('click', function(){
 	$('#main-menu').hide();
 	$('#instructions').css('display', 'flex');
 });
-$('#back-to-menu').on('click', function(){
+$('.back-to-menu').on('click', function(){
+	$('#high-scores').hide();
 	$('#instructions').hide();
 	$('#main-menu').show();
+});
+$('#high-scores-button').on('click', function(){
+	socket.emit('getHighScores');
+});
+
+socket.on('highestScoringPerson', function(highestInfo){
+	$('#main-menu').hide();
+	$('#high-scores').css('display', 'flex');
+	$('#high-score-info').html(highestInfo.name + '<br/>' + highestInfo.wins);
 });
 
 socket.on('bothReady', function(){

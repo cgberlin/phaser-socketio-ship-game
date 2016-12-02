@@ -67,6 +67,23 @@ io.sockets.on('connection', function (socket) {
   	}
   });
 
+  socket.on('getHighScores', function(){
+  	HighScores.find(function(err, scores){
+  		if (err) {
+            console.log('problem with db');
+        }
+  		var highestScore = 0;
+  		var highestInfo;
+  		for (var i = 0, scoresLength = scores.length; i < scoresLength; i++){
+  			if (scores[i].wins > highestScore){
+  				highestScore = scores[i].wins;
+  				highestInfo = scores[i];
+  			}
+  		}
+  		socket.emit('highestScoringPerson', highestInfo);
+  	});
+  });
+
 });
 
 function createAsteroidGenerations(){

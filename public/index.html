@@ -14,14 +14,19 @@
         <h1>2 Player Phaser Ship Game</h1>
         <input id = "name" type = "text" placeholder="Enter Name to Play"/>
         <button id = "start-button">START</button>
-        <button id = "high-scores">HIGH SCORES</button>
+        <button id = "high-scores-button">HIGH SCORES</button>
         <button id = "instructions-button">INSTRUCTIONS</button>
       </div>
       <div class = "basic-menu" id = "instructions">
         <h1>Controls</h1>
         <h3>W to move forward</br>A to rotate left</br>D to rotate right</br>F to fire (will probably change)</h3>
         <h3>Hitting the enemy ship: 1 point </br> Crashing into an asteroid: -1 point</br> 5 points to win!</h3>
-        <button id = "back-to-menu">Main</button>
+        <button class = "back-to-menu">Main</button>
+      </div>
+      <div class = "basic-menu" id = "high-scores">
+        <h1>HIGHEST SCORE</h1>
+        <h3 id = "high-score-info"></h3>
+        <button class = "back-to-menu">Main</button>
       </div>
       <div id = "waiting-lobby">
         <h2>Waiting on other player</h2>
