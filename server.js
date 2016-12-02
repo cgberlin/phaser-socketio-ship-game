@@ -5,7 +5,6 @@ var mongoose = require('mongoose');
 var HighScores = require('./models/high-score');
 var app = express();
 var config = require('./config');
-
 var server = http.Server(app);
 var io = socket_io(server);
 
@@ -15,9 +14,11 @@ createAsteroidGenerations();
 
 io.sockets.on('connection', function (socket) {
   console.log("client connected" + numberOfClients);
+
   socket.on('SendOverTheAsteroidData', function(){
   	socket.emit('sendAsteroidData', asteroidData);
   });
+
   socket.on('enemyMove', function(enemyLocation){
   	socket.broadcast.emit('updateEnemyMove', enemyLocation);
   });
@@ -29,6 +30,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('hitEnemyShipUpdateScore', function(){
   	socket.broadcast.emit('updateEnemyScore');
   });
+
   socket.on('lowerMyScore', function(){
   	socket.broadcast.emit('enemyGotHitAsteroid');
   });
@@ -50,12 +52,14 @@ io.sockets.on('connection', function (socket) {
         }
         if (!highscore.length) {
         	console.log("No item found, creating item");
+        	var highscore = [{name : nameWinner, 'wins': 1}];
         	HighScores.create({name : nameWinner, 'wins': 1});
    		}
     	else {
         	highscore[0].wins += 1;
 	        console.log(highscore);
 	    }
+	    numberOfClients = 0;
 	    io.emit('playAgain', highscore);
     });
   });	
@@ -84,7 +88,6 @@ io.sockets.on('connection', function (socket) {
   		socket.emit('highestScoringPerson', highestInfo);
   	});
   });
-
 });
 
 function createAsteroidGenerations(){
@@ -103,11 +106,9 @@ function createAsteroidGenerations(){
 			x : randomValueX,
 			y : randomValueY
 		}
-
 		var tempAngularVelocity = Math.random() * (150 - 50) + 50;
 		var tempAngle = Math.random() * (180 + 180) - 180;
 		var tempVelocity = Math.random() * (150 - 50) + 50;
-
 		randomVelocityValues.push(tempVelocity);
 		randomAngleValues.push(tempAngle);
 		randomAngularVelocityValues.push(tempAngularVelocity);
@@ -124,7 +125,6 @@ var runServer = function(callback) {    //connects to the mongodb
         if (err && callback) {
             return callback(err);
         }
-
         server.listen(config.PORT, function() {
             console.log('Listening on localhost:' + config.PORT);
             if (callback) {

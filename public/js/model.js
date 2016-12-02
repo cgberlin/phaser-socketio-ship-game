@@ -22,15 +22,18 @@ $('#start-button').on('click', function(){
 		alert('need a name to play');
 	}
 });
+
 $('#instructions-button').on('click', function(){
 	$('#main-menu').hide();
 	$('#instructions').css('display', 'flex');
 });
+
 $('.back-to-menu').on('click', function(){
 	$('#high-scores').hide();
 	$('#instructions').hide();
 	$('#main-menu').show();
 });
+
 $('#high-scores-button').on('click', function(){
 	socket.emit('getHighScores');
 });
@@ -49,9 +52,22 @@ socket.on('bothReady', function(){
 		updateScore();
 	},2000);
 });
+
 socket.on('playAgain', function(winnerInfo){
 	$('#play-again-menu').show();
 	$('#winners-info-end-game').html(winnerInfo[0].name + '<br/>' + 'Wins:' + ' ' + winnerInfo[0].wins);
+});
+
+$('#play-again-button').on('click', function(){
+	console.log('creating new game');
+	enoughClients = false;
+	myScore = 0;
+	enemyScore = 0;
+	game.destroy();
+	$('#game-menu').hide();
+	$('#play-again-menu').hide();
+	$('#waiting-lobby').show();
+	socket.emit('playerReady');
 });
 
 var shipPosition;
@@ -61,7 +77,6 @@ function preload() {
   game.load.image('ship1', '../assets/ship1.png');
   game.load.image('bullet', '../assets/bullet.png');
   game.load.image('asteroidMed', '../assets/asteroid-medium.png');
-
 }
 
 var sprite,
@@ -72,7 +87,6 @@ function create() {
     starfield = game.add.tileSprite(0, 0, 4000, 4000, 'starfield');
    
     game.world.setBounds(0, 0, 4000, 4000);
-
 
     game.input.keyboard.createCursorKeys();
     wasd = {
@@ -96,8 +110,6 @@ function create() {
     ship1.body.maxVelocity.set(300);
     ship1.body.collideWorldBounds = true;
 
-    
-
     enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
     game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
     enemyShip.enableBody=true;
@@ -119,8 +131,6 @@ function create() {
     enemyBullets.setAll('outOfBoundsKill', true);
     enemyBullets.setAll('checkWorldBounds', true);
     socket.emit('SendOverTheAsteroidData');
-
-
 }
 
 function update() {
@@ -161,7 +171,6 @@ function update() {
         socket.emit('enemyMove', locationData);
 }
 
-
 function fire() {
 
 	var bullet = bullets.getFirstExists(false);
@@ -185,7 +194,6 @@ function fire() {
 function randomReset(WhatKind){
 	WhatKind.reset(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height));
 }
-
 
 function shipHitAsteroid(asteroid){
 	asteroid.kill();
@@ -215,12 +223,12 @@ function killedEnemy(){
 
 function updateScore(){
 	$('#my-score').html('My score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
-	if (myScore === 2){
+	if (myScore === 5){
 		alert('You win!');
 		socket.emit('winner', myName);
 
 	}
-	else if (enemyScore === 2){
+	else if (enemyScore === 5){
 		alert('Enemy Won');
 	}
 }
@@ -230,31 +238,33 @@ socket.on('updateEnemyMove', function(enemyLocation){
 		enemyShip.position.y = enemyLocation.position.y;
 		enemyShip.angle = enemyLocation.angle;
 });
+
 socket.on('enemyBullets', function(bulletLocationInfo){
 	var enemyBullet = enemyBullets.create(bulletLocationInfo.position.x, bulletLocationInfo.position.y, 'bullet');
 	enemyBullet.angle = bulletLocationInfo.angle;
 	enemyBullet.body.velocity.x = bulletLocationInfo.velocity.x;
 	enemyBullet.body.velocity.y = bulletLocationInfo.velocity.y;
 });
+
 socket.on('sendAsteroidData', function(data){
 	var numberOfAsteroids = data.numberOfAsteroids;
     for (var i = 0; i < numberOfAsteroids; i++){
     	var asteroid = asteroids.create(data.locationValues[i].x, data.locationValues[i].y, 'asteroidMed');
         asteroid.anchor.set(0.5, 0.5);
         asteroid.body.angularVelocity = data.angularVelocities[i];
- 
 	    var randomAngle = game.math.degToRad(data.angles[i]);
-	    var randomVelocity = data.randomVelocities[i];
-	 	
+	    var randomVelocity = data.randomVelocities[i];	 	
 	    game.physics.arcade.velocityFromRotation(randomAngle, randomVelocity, asteroid.body.velocity);
    		asteroid.body.collideWorldBounds = true;
    		asteroid.body.bounce.setTo(0.9, 0.9);
     }
 });
+
 socket.on('updateEnemyScore', function(){
 	enemyScore++;
 	updateScore();
 });
+
 socket.on('enemyGotHitAsteroid', function(){
 	enemyScore--;
 	updateScore();

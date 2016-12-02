@@ -20,36 +20,26 @@ button {
 }
 
 #game-menu {
+    top: 0px;
+    color: #000;
+}
+#game-menu, #play-again-menu {
 	position: fixed;
 	height:3rem;
 	width:100vw;
-    top: 0px;
-    right: 0px;
-    opacity: 1;
-    color: #000;
-    display: block;
+	display: block;
     padding: 10px 9px;
     padding-bottom: 6px;
     font-size: 16px;
     z-index: 999999;
     display: none;
     text-align: center;
+    right: 0px;
+    opacity: 1;
 }
 #play-again-menu {
-	position: fixed;
-	height:3rem;
-	width:100vw;
     top: 8rem;
-    right: 0px;
-    opacity: 1;
-    color: #000;
-    display: block;
-    padding: 10px 9px;
-    padding-bottom: 6px;
-    font-size: 16px;
-    z-index: 999999;
-    display: none;
-    text-align: center;
+    color: white;
 }
 h3, #waiting-lobby {
 	color:white;
