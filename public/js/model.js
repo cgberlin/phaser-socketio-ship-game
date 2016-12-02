@@ -49,6 +49,10 @@ socket.on('bothReady', function(){
 		updateScore();
 	},2000);
 });
+socket.on('playAgain', function(winnerInfo){
+	$('#play-again-menu').show();
+	$('#winners-info-end-game').html(winnerInfo[0].name + '<br/>' + 'Wins:' + ' ' + winnerInfo[0].wins);
+});
 
 var shipPosition;
 
@@ -211,11 +215,12 @@ function killedEnemy(){
 
 function updateScore(){
 	$('#my-score').html('My score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
-	if (myScore === 1){
+	if (myScore === 2){
 		alert('You win!');
 		socket.emit('winner', myName);
+
 	}
-	else if (enemyScore === 1){
+	else if (enemyScore === 2){
 		alert('Enemy Won');
 	}
 }

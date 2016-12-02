@@ -51,11 +51,12 @@ io.sockets.on('connection', function (socket) {
         if (!highscore.length) {
         	console.log("No item found, creating item");
         	HighScores.create({name : nameWinner, 'wins': 1});
-    }
+   		}
     	else {
         	highscore[0].wins += 1;
-        	console.log(highscore);
-    }
+	        console.log(highscore);
+	    }
+	    io.emit('playAgain', highscore);
     });
   });	
 

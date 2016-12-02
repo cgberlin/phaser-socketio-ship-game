@@ -35,6 +35,22 @@ button {
     display: none;
     text-align: center;
 }
+#play-again-menu {
+	position: fixed;
+	height:3rem;
+	width:100vw;
+    top: 8rem;
+    right: 0px;
+    opacity: 1;
+    color: #000;
+    display: block;
+    padding: 10px 9px;
+    padding-bottom: 6px;
+    font-size: 16px;
+    z-index: 999999;
+    display: none;
+    text-align: center;
+}
 h3, #waiting-lobby {
 	color:white;
 }
