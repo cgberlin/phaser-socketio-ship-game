@@ -68,6 +68,8 @@ function create() {
     ship1 = game.add.sprite(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height) , 'ship1');    
     game.physics.enable(ship1, Phaser.Physics.ARCADE);
     ship1.enableBody=true;
+    ship1.angle = -90;
+    ship1.anchor.set(0.5,0.5);
     ship1.body.drag.x = 50;
     ship1.body.drag.y = 50;
     ship1.body.maxVelocity.x = 300;
