@@ -70,10 +70,8 @@ function create() {
     ship1.enableBody=true;
     ship1.angle = -90;
     ship1.anchor.set(0.5,0.5);
-    ship1.body.drag.x = 50;
-    ship1.body.drag.y = 50;
-    ship1.body.maxVelocity.x = 300;
-    ship1.body.maxVelocity.y = 300;
+    ship1.body.drag.set(100);
+    ship1.body.maxVelocity.set(300);
     ship1.body.collideWorldBounds = true;
 
     
@@ -88,6 +86,8 @@ function create() {
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
     bullets.createMultiple(30, 'bullet');
+    bullets.setAll('anchor.x', 0.5);
+    bullets.setAll('anchor.y', 0.5);
     bullets.setAll('outOfBoundsKill', true);
     bullets.setAll('checkWorldBounds', true);
 
@@ -116,56 +116,40 @@ function update() {
         game.physics.arcade.overlap(enemyBullets, ship1, enemyKilledYou, null, this);
         game.physics.arcade.overlap(bullets, enemyShip, killedEnemy, null, this);
 
-        wasd.up.onDown.add(function(){
-        	ship1.body.velocity.y-- ;
-        	getAngle();
-        	ship1.angle = newAngle;
-        });
-        wasd.down.onDown.add(function(){
-        	ship1.body.velocity.y++ ;
-        	getAngle();
-        	ship1.angle = newAngle;
-        });
-        wasd.left.onDown.add(function(){
-        	ship1.body.velocity.x--;
-        	getAngle();
-        	ship1.angle = newAngle;
-        });
-        wasd.right.onDown.add(function(){
-        	ship1.body.velocity.x++;
-        	getAngle();
-        	ship1.angle = newAngle;
-        });
-        wasd.fire.onDown.add(function(){
-        	fire();
-        });
+       	if (wasd.left.isDown) {
+       		ship1.body.angularVelocity = -200;
+       	}
+       	else if (wasd.right.isDown) {
+       		ship1.body.angularVelocity = 200;
+       	}
+       	else {
+       		ship1.body.angularVelocity = 0;
+       	}
+
+       	if (wasd.up.isDown) {
+       		game.physics.arcade.accelerationFromRotation(ship1.rotation, 300, ship1.body.acceleration);
+       	}
+       	else {
+       		ship1.body.acceleration.set(0);
+       	}
+
+       	if (wasd.fire.isDown) {
+       		fire();
+       	}
         socket.emit('enemyMove', locationData);
 }
 
-function getAngle(){
-	newAngle = Math.atan2(shipsVelocity.y, shipsVelocity.x)
-	newAngle = (newAngle * 180 / Math.PI);
-}
 
 function fire() {
 
 	var bullet = bullets.getFirstExists(false);
 
 	if(bullet) {
-		bullet.reset(ship1.x - 8, ship1.y - 8);
-		bullet.angle = ship1.angle;
-		if (ship1.body.velocity.x >= 0){
-			bullet.body.velocity.x = (ship1.body.velocity.x + 200);
-		}
-		else {
-			bullet.body.velocity.x = (ship1.body.velocity.x - 200);
-		}
-		if (ship1.body.velocity.y >= 0){
-			bullet.body.velocity.y = (ship1.body.velocity.y + 200);
-		}
-		else {
-			bullet.body.velocity.y = (ship1.body.velocity.y - 200);
-		}
+		var x = ship1.x + (Math.cos(ship1.rotation) * length);
+        var y = ship1.y + (Math.sin(ship1.rotation) * length);
+		bullet.reset(x, y);
+		bullet.rotation = ship1.rotation;
+		game.physics.arcade.velocityFromRotation(ship1.rotation, 450, bullet.body.velocity);
 		bulletLocationInfo = {
 			position : bullet.position,
 			angle : bullet.angle,
