@@ -26,6 +26,13 @@ io.sockets.on('connection', function (socket) {
   	socket.broadcast.emit('enemyBullets', bulletLocationInfo);
   });
 
+  socket.on('hitEnemyShipUpdateScore', function(){
+  	socket.broadcast.emit('updateEnemyScore');
+  });
+  socket.on('lowerMyScore', function(){
+  	socket.broadcast.emit('enemyGotHitAsteroid');
+  });
+
   socket.on('disconnect', function() {
   	if (numberOfClients > 0){
   		numberOfClients--;

@@ -22,6 +22,14 @@ $('#start-button').on('click', function(){
 		alert('need a name to play');
 	}
 });
+$('#instructions-button').on('click', function(){
+	$('#main-menu').hide();
+	$('#instructions').css('display', 'flex');
+});
+$('#back-to-menu').on('click', function(){
+	$('#instructions').hide();
+	$('#main-menu').show();
+});
 
 socket.on('bothReady', function(){
 	setTimeout(function(){
@@ -165,10 +173,14 @@ function randomReset(WhatKind){
 }
 
 
-function shipHitAsteroid() {
-	//myScore--;
-	//updateScore();
-	//randomReset(ship1);
+function shipHitAsteroid(asteroid){
+	asteroid.kill();
+	randomReset(ship1);
+	if (myScore > 0){
+		myScore--;
+		updateScore();
+		socket.emit('lowerMyScore');
+	}
 }
 
 function bulletHitAsteroid(bullet, asteroid) {
@@ -178,14 +190,13 @@ function bulletHitAsteroid(bullet, asteroid) {
 
 function enemyKilledYou(){
 	randomReset(ship1);
-	enemyScore++;
-	updateScore();
 }
 
 function killedEnemy(){
 	randomReset(enemyShip);
 	myScore++;
 	updateScore();
+	socket.emit('hitEnemyShipUpdateScore');
 }
 
 function updateScore(){
@@ -193,6 +204,9 @@ function updateScore(){
 	if (myScore === 1){
 		alert('You win!');
 		socket.emit('winner', myName);
+	}
+	else if (enemyScore === 1){
+		alert('Enemy Won');
 	}
 }
 
@@ -222,5 +236,11 @@ socket.on('sendAsteroidData', function(data){
    		asteroid.body.bounce.setTo(0.9, 0.9);
     }
 });
-
-
+socket.on('updateEnemyScore', function(){
+	enemyScore++;
+	updateScore();
+});
+socket.on('enemyGotHitAsteroid', function(){
+	enemyScore--;
+	updateScore();
+});

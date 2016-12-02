@@ -1,11 +1,12 @@
 *{
 	box-sizing: border-box;
+	font-family: 'Bungee', cursive;
 }
 body {
 	background-image: url(https://raw.githubusercontent.com/jschomay/phaser-demo-game/master/assets/starfield.png);
 	background-size:cover;
 }
-#main-menu {
+.basic-menu {
 	display: flex;
 	flex-flow: column;
 	align-items: center;
@@ -36,9 +37,11 @@ button {
 }
 h3, #waiting-lobby {
 	color:white;
-	font-family: 'Bungee', cursive;
 }
 #waiting-lobby {
 	display: none;
 	text-align: center;
+}
+#instructions {
+	display: none;
 }
