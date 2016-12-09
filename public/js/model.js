@@ -227,6 +227,7 @@ function bulletHitAsteroid(bullet, asteroid) {
 }
 
 function enemyKilledYou(){
+	enemyBullets.callAll('kill');
 	ship1.loadTexture('explosions', 0);
 	ship1.animations.add('explode');
 	ship1.animations.play('explode', 7, false, true);
@@ -237,11 +238,13 @@ function enemyKilledYou(){
 }
 
 function killedEnemy(){
+	bullets.callAll('kill');
 	randomReset(enemyShip);
 	myScore++;
 	updateScore();
 	socket.emit('hitEnemyShipUpdateScore');
 }
+
 
 function updateScore(){
 	$('#my-score').html('My score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
