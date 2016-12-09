@@ -77,10 +77,12 @@ function preload() {
   game.load.image('ship1', '../assets/ship1.png');
   game.load.image('bullet', '../assets/bullet.png');
   game.load.image('asteroidMed', '../assets/asteroid-medium.png');
+  game.load.spritesheet('explosions', '../assets/boom.png', 32, 32);
 }
 
 var sprite,
-	text;
+	text,
+	boom;
 
 function create() {
 
@@ -97,10 +99,13 @@ function create() {
 		  fire : game.input.keyboard.addKey(Phaser.Keyboard.F)
 		};
 
+
     asteroids = game.add.group();
     asteroids.enableBody = true;
     asteroids.physicsBodyType = Phaser.Physics.ARCADE;
 
+
+	
     ship1 = game.add.sprite(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height) , 'ship1');    
     game.physics.enable(ship1, Phaser.Physics.ARCADE);
     ship1.enableBody=true;
@@ -195,9 +200,20 @@ function randomReset(WhatKind){
 	WhatKind.reset(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height));
 }
 
-function shipHitAsteroid(asteroid){
-	asteroid.kill();
+function boomDone() {
 	randomReset(ship1);
+}
+
+function shipHitAsteroid(ship, asteroid){
+	ship1.loadTexture('explosions', 0);
+	ship1.animations.add('explode');
+	ship1.animations.play('explode', 7, false, true);
+	setTimeout(function(){
+		randomReset(ship1);
+		ship1.loadTexture('ship1');
+	}, 2000);
+	asteroid.kill();
+
 	if (myScore > 0){
 		myScore--;
 		updateScore();
@@ -211,7 +227,13 @@ function bulletHitAsteroid(bullet, asteroid) {
 }
 
 function enemyKilledYou(){
-	randomReset(ship1);
+	ship1.loadTexture('explosions', 0);
+	ship1.animations.add('explode');
+	ship1.animations.play('explode', 7, false, true);
+	setTimeout(function(){
+		randomReset(ship1);
+		ship1.loadTexture('ship1');
+	}, 2000);
 }
 
 function killedEnemy(){
