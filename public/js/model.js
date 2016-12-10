@@ -45,7 +45,7 @@ socket.on('highestScoringPerson', function(highestInfo){
 	$('#high-score-info').html(highestInfo.name + '<br/>' + highestInfo.wins);
 });
 
-socket.on('bothReady', function(){
+socket.on('bothReady', function(){    //checks to make sure both players are ready, then initializes the game
 	setTimeout(function(){
 		$('#waiting-lobby').hide();
 		game = new Phaser.Game(winW, winH, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
@@ -60,7 +60,7 @@ socket.on('playAgain', function(winnerInfo){
 });
 
 $('#play-again-button').on('click', function(){
-	console.log('creating new game');
+	console.log('creating new game');             //if both players choose to play again, it will destroy and reset the game
 	enoughClients = false;
 	myScore = 0;
 	enemyScore = 0;
@@ -102,22 +102,21 @@ function create() {
 		  fire : game.input.keyboard.addKey(Phaser.Keyboard.F)
 		};
 
-    asteroids = game.add.group();
+    asteroids = game.add.group();        
     asteroids.enableBody = true;
     asteroids.physicsBodyType = Phaser.Physics.ARCADE;
 
     ship1 = game.add.sprite(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height) , 'ship1');    
     game.physics.enable(ship1, Phaser.Physics.ARCADE);
     ship1.enableBody=true;
-    ship1.angle = -90;
+    ship1.angle = -90;                                     //creation and initialization of the players ship
     ship1.anchor.set(0.5,0.5);
     ship1.body.drag.set(100);
     ship1.body.maxVelocity.set(300);
     ship1.body.collideWorldBounds = true;
 
-    emitter = game.add.emitter(0, 0, 1000);
+    emitter = game.add.emitter(0, 0, 1000);       //creates the particle emitter for the players ship
   	emitter.makeParticles('laser');
-
   	ship1.addChild(emitter);
     emitter.y = 0;
   	emitter.x = -16;
@@ -126,12 +125,12 @@ function create() {
     emitter.minParticleSpeed = new Phaser.Point(-200,-50);
 
     enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
-    game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
+    game.physics.enable(enemyShip, Phaser.Physics.ARCADE);           //spawns the enemy ship
     enemyShip.enableBody=true;
 
     game.camera.follow(ship1,Phaser.Camera.FOLLOW_LOCKON);
 
-   	bullets = game.add.group();
+   	bullets = game.add.group();                 //creates group and rules for player bullets
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
     bullets.createMultiple(30, 'bullet');
@@ -140,7 +139,7 @@ function create() {
     bullets.setAll('outOfBoundsKill', true);
     bullets.setAll('checkWorldBounds', true);
 
-    enemyBullets = game.add.group();
+    enemyBullets = game.add.group();               //creates group and rules for enemy bullets
     enemyBullets.enableBody = true;
     enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
     enemyBullets.setAll('outOfBoundsKill', true);
@@ -158,13 +157,13 @@ function update() {
 		shipsVelocity = ship1.body.velocity;
         game.physics.arcade.collide(asteroids);
 
-        game.physics.arcade.overlap(bullets, asteroids, bulletHitAsteroid, null, this);
+        game.physics.arcade.overlap(bullets, asteroids, bulletHitAsteroid, null, this);     //collision/overlap checks for all the game elements
         game.physics.arcade.overlap(ship1, asteroids, shipHitAsteroid, null, this);
         game.physics.arcade.overlap(enemyBullets, ship1, enemyKilledYou, null, this);
         game.physics.arcade.overlap(bullets, enemyShip, killedEnemy, null, this);
 
-       	if (wasd.left.isDown) {
-       		if (shipAlive == true) {
+       	if (wasd.left.isDown) {            
+       		if (shipAlive == true) {           //checks to make sure death animation isnt playing before allowing movement and particles
 	       		emitter.emitParticle();
 	       		ship1.body.angularVelocity = -200;
 	       	}
@@ -194,12 +193,12 @@ function update() {
        			fire();
        		}
        	}
-        socket.emit('enemyMove', locationData);
+        socket.emit('enemyMove', locationData);    //sends ships data to the server
 }
 
 function fire() {
 
-	var bullet = bullets.getFirstExists(false);
+	var bullet = bullets.getFirstExists(false);      //bullet generation
 
 	if(bullet) {
 		var x = ship1.x + (Math.cos(ship1.rotation) * length);
@@ -213,14 +212,13 @@ function fire() {
 			velocity : bullet.body.velocity,
 			rotation : bullet.rotation
 		}
-		socket.emit('myBullets', bulletLocationInfo);
+		socket.emit('myBullets', bulletLocationInfo);  //sends bullet info to the server
 	}
 }
 
 function randomReset(WhatKind){
 	WhatKind.reset(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height));
 }
-
 
 function shipHitAsteroid(ship, asteroid){
 	ship1.loadTexture('explosions', 0);
@@ -246,7 +244,7 @@ function bulletHitAsteroid(bullet, asteroid) {
 	bullet.kill();
 }
 
-function enemyKilledYou(){
+function enemyKilledYou(){ 
 	enemyBullets.callAll('kill');
 	ship1.loadTexture('explosions', 0);
 	ship1.animations.add('explode');
@@ -266,7 +264,6 @@ function killedEnemy(){
 	updateScore();
 	socket.emit('hitEnemyShipUpdateScore');
 }
-
 
 function updateScore(){
 	$('#my-score').html('My score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
@@ -293,7 +290,7 @@ socket.on('enemyBullets', function(bulletLocationInfo){
 	enemyBullet.body.velocity.y = bulletLocationInfo.velocity.y;
 });
 
-socket.on('sendAsteroidData', function(data){
+socket.on('sendAsteroidData', function(data){           //handles all of the asteroid generation using values sent from the server
 	var numberOfAsteroids = data.numberOfAsteroids;
     for (var i = 0; i < numberOfAsteroids; i++){
     	var asteroid = asteroids.create(data.locationValues[i].x, data.locationValues[i].y, 'asteroidMed');

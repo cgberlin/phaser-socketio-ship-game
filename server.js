@@ -90,9 +90,9 @@ io.sockets.on('connection', function (socket) {
   });
 });
 
-function createAsteroidGenerations(){
-	randomLocationValuesForAsteroids = [];
-	randomAngularVelocityValues = [];
+function createAsteroidGenerations(){           //creates all of the values for the asteroids to simultaneously send to each client
+	randomLocationValuesForAsteroids = [];        //this allows for both players to have asteroids in the same spaces at the same time
+	randomAngularVelocityValues = [];             //without huge amounts of data being sent back and forth
 	randomAngleValues = [];
 	randomVelocityValues = [];
 	asteroidData = {
