@@ -9,7 +9,8 @@ var game,
 	scoreText,
 	myName,
 	shipsVelocity,
-	newAngle;
+	newAngle,
+	shipAlive = true;
 
 $('#start-button').on('click', function(){
 	if ($('#name').val() != ''){
@@ -77,12 +78,14 @@ function preload() {
   game.load.image('ship1', '../assets/ship1.png');
   game.load.image('bullet', '../assets/bullet.png');
   game.load.image('asteroidMed', '../assets/asteroid-medium.png');
+  game.load.image('laser', '../assets/rain.png');
   game.load.spritesheet('explosions', '../assets/boom.png', 32, 32);
 }
 
 var sprite,
 	text,
-	boom;
+	boom, 
+	trail;
 
 function create() {
 
@@ -99,13 +102,10 @@ function create() {
 		  fire : game.input.keyboard.addKey(Phaser.Keyboard.F)
 		};
 
-
     asteroids = game.add.group();
     asteroids.enableBody = true;
     asteroids.physicsBodyType = Phaser.Physics.ARCADE;
 
-
-	
     ship1 = game.add.sprite(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height) , 'ship1');    
     game.physics.enable(ship1, Phaser.Physics.ARCADE);
     ship1.enableBody=true;
@@ -114,6 +114,16 @@ function create() {
     ship1.body.drag.set(100);
     ship1.body.maxVelocity.set(300);
     ship1.body.collideWorldBounds = true;
+
+    emitter = game.add.emitter(0, 0, 1000);
+  	emitter.makeParticles('laser');
+
+  	ship1.addChild(emitter);
+    emitter.y = 0;
+  	emitter.x = -16;
+	emitter.lifespan = 500;
+    emitter.maxParticleSpeed = new Phaser.Point(-100,50);
+    emitter.minParticleSpeed = new Phaser.Point(-200,-50);
 
     enemyShip = game.add.sprite(game.world.centerX, game.world.centerY, 'ship1');    
     game.physics.enable(enemyShip, Phaser.Physics.ARCADE);
@@ -125,7 +135,7 @@ function create() {
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
     bullets.createMultiple(30, 'bullet');
-    bullets.setAll('anchor.x', 0.5);
+    bullets.setAll('anchor.x', 0);
     bullets.setAll('anchor.y', 0.5);
     bullets.setAll('outOfBoundsKill', true);
     bullets.setAll('checkWorldBounds', true);
@@ -154,24 +164,35 @@ function update() {
         game.physics.arcade.overlap(bullets, enemyShip, killedEnemy, null, this);
 
        	if (wasd.left.isDown) {
-       		ship1.body.angularVelocity = -200;
+       		if (shipAlive == true) {
+	       		emitter.emitParticle();
+	       		ship1.body.angularVelocity = -200;
+	       	}
        	}
        	else if (wasd.right.isDown) {
-       		ship1.body.angularVelocity = 200;
+       		if (shipAlive == true) {
+	       		emitter.emitParticle();
+	       		ship1.body.angularVelocity = 200;
+	       	}
        	}
        	else {
        		ship1.body.angularVelocity = 0;
        	}
 
        	if (wasd.up.isDown) {
-       		game.physics.arcade.accelerationFromRotation(ship1.rotation, 300, ship1.body.acceleration);
+       		if (shipAlive == true) {
+	       		emitter.emitParticle();
+	       		game.physics.arcade.accelerationFromRotation(ship1.rotation, 300, ship1.body.acceleration);
+		    }
        	}
        	else {
        		ship1.body.acceleration.set(0);
        	}
 
        	if (wasd.fire.isDown) {
-       		fire();
+       		if (shipAlive == true) {
+       			fire();
+       		}
        	}
         socket.emit('enemyMove', locationData);
 }
@@ -200,17 +221,16 @@ function randomReset(WhatKind){
 	WhatKind.reset(game.rnd.integerInRange(30, game.world.height), game.rnd.integerInRange(30, game.world.height));
 }
 
-function boomDone() {
-	randomReset(ship1);
-}
 
 function shipHitAsteroid(ship, asteroid){
 	ship1.loadTexture('explosions', 0);
 	ship1.animations.add('explode');
 	ship1.animations.play('explode', 7, false, true);
+	shipAlive = false;
 	setTimeout(function(){
 		randomReset(ship1);
 		ship1.loadTexture('ship1');
+		shipAlive = true;
 	}, 2000);
 	asteroid.kill();
 
@@ -231,9 +251,11 @@ function enemyKilledYou(){
 	ship1.loadTexture('explosions', 0);
 	ship1.animations.add('explode');
 	ship1.animations.play('explode', 7, false, true);
+	shipAlive = false;
 	setTimeout(function(){
 		randomReset(ship1);
 		ship1.loadTexture('ship1');
+		shipAlive = true;
 	}, 2000);
 }
 
