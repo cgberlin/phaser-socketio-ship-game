@@ -1,6 +1,10 @@
 
 var winH = window.innerHeight;
 var winW = window.innerWidth;
+
+if (winW < 800){
+	alert("Sorry, working on mobile support");
+}
 var socket = io();
 var game,
 	enoughClients = false,
