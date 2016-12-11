@@ -7,8 +7,7 @@ Landing Screen        			     |  Waiting Lobby
 
 ## Introduction
 I built this game as a proof of concept and demonstration for multiplayer gaming
-using only socket.io, PhaserJS, nodeJS, and a little bit of jQuery. Right now
-it will work for 2 players. For testing with yourself you can just open two tabs
+using only socket.io, PhaserJS, nodeJS, and a little bit of jQuery. For testing with yourself you can just open two tabs
 in your browser to trick the server. 
 
 Instructions Panel        			 |  Ingame Screenshot
