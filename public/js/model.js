@@ -14,7 +14,8 @@ var game,
 	myName,
 	shipsVelocity,
 	newAngle,
-	shipAlive = true;
+	shipAlive = true,
+	roomNumber;
 
 $('#start-button').on('click', function(){
 	if ($('#name').val() != ''){
@@ -49,7 +50,9 @@ socket.on('highestScoringPerson', function(highestInfo){
 	$('#high-score-info').html(highestInfo.name + '<br/>' + highestInfo.wins);
 });
 
-socket.on('bothReady', function(){    //checks to make sure both players are ready, then initializes the game
+socket.on('bothReady', function(roomToJoin){    //checks to make sure both players are ready, then initializes the game
+	roomNumber = roomToJoin;
+	console.log(roomNumber);
 	setTimeout(function(){
 		$('#waiting-lobby').hide();
 		game = new Phaser.Game(winW, winH, Phaser.CANVAS, 'phaser', { preload: preload, create: create, update: update });
@@ -148,7 +151,7 @@ function create() {
     enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
     enemyBullets.setAll('outOfBoundsKill', true);
     enemyBullets.setAll('checkWorldBounds', true);
-    socket.emit('SendOverTheAsteroidData');
+    socket.emit('SendOverTheAsteroidData', roomNumber);
 }
 
 function update() {
@@ -197,7 +200,7 @@ function update() {
        			fire();
        		}
        	}
-        socket.emit('enemyMove', locationData);    //sends ships data to the server
+        socket.emit('enemyMove', {"locationData" : locationData, "roomNumber" : roomNumber});    //sends ships data to the server
 }
 
 function fire() {
@@ -216,7 +219,7 @@ function fire() {
 			velocity : bullet.body.velocity,
 			rotation : bullet.rotation
 		}
-		socket.emit('myBullets', bulletLocationInfo);  //sends bullet info to the server
+		socket.emit('myBullets', {"bulletLocationInfo" : bulletLocationInfo, "roomNumber" : roomNumber});  //sends bullet info to the server
 	}
 }
 
@@ -239,7 +242,7 @@ function shipHitAsteroid(ship, asteroid){
 	if (myScore > 0){
 		myScore--;
 		updateScore();
-		socket.emit('lowerMyScore');
+		socket.emit('lowerMyScore', roomNumber);
 	}
 }
 
@@ -266,14 +269,14 @@ function killedEnemy(){
 	randomReset(enemyShip);
 	myScore++;
 	updateScore();
-	socket.emit('hitEnemyShipUpdateScore');
+	socket.emit('hitEnemyShipUpdateScore', roomNumber);
 }
 
 function updateScore(){
 	$('#my-score').html('My score: ' + myScore + ' <br/> ' + 'Enemy Score: ' + enemyScore);
 	if (myScore === 5){
 		alert('You win!');
-		socket.emit('winner', myName);
+		socket.emit('winner', {"myName" : myName, "roomNumber" : roomNumber});
 
 	}
 	else if (enemyScore === 5){

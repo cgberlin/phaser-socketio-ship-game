@@ -7,7 +7,7 @@ var app = express();
 var config = require('./config');
 var server = http.Server(app);
 var io = socket_io(server);
-
+var roomList = [];
 var asteroidData,
 	numberOfClients = 0;
 createAsteroidGenerations();
@@ -15,61 +15,69 @@ createAsteroidGenerations();
 io.sockets.on('connection', function (socket) {
   console.log("client connected" + numberOfClients);
 
-  socket.on('SendOverTheAsteroidData', function(){
-  	socket.emit('sendAsteroidData', asteroidData);
+  socket.on('SendOverTheAsteroidData', function(roomNumber){
+  	io.sockets.in(roomNumber).emit('sendAsteroidData', asteroidData);
   });
 
   socket.on('enemyMove', function(enemyLocation){
-  	socket.broadcast.emit('updateEnemyMove', enemyLocation);
+  	socket.broadcast.to(enemyLocation.roomNumber).emit('updateEnemyMove', enemyLocation.locationData);
   });
 
   socket.on('myBullets', function(bulletLocationInfo){
-  	socket.broadcast.emit('enemyBullets', bulletLocationInfo);
+  	socket.broadcast.to(bulletLocationInfo.roomNumber).emit('enemyBullets', bulletLocationInfo.bulletLocationInfo);
   });
 
-  socket.on('hitEnemyShipUpdateScore', function(){
-  	socket.broadcast.emit('updateEnemyScore');
+  socket.on('hitEnemyShipUpdateScore', function(roomNumber){
+  	socket.broadcast.to(roomNumber).emit('updateEnemyScore');
   });
 
-  socket.on('lowerMyScore', function(){
-  	socket.broadcast.emit('enemyGotHitAsteroid');
-  });
-
-  socket.on('disconnect', function() {
-  	if (numberOfClients > 0){
-  		numberOfClients--;
-  	}
+  socket.on('lowerMyScore', function(roomNumber){
+  	socket.broadcast.to(roomNumber).emit('enemyGotHitAsteroid');
   });
 
   socket.on('winner', function(nameWinner){
   	var query = {
-  		name : nameWinner
+  		name : nameWinner.myName
   	}
   	console.log(nameWinner);
-  	HighScores.find({name : nameWinner}, function(err, highscore) {
+  	HighScores.find({name : nameWinner.myName}, function(err, highscore) {
         if (err) {
             console.log('problem with db');
         }
         if (!highscore.length) {
         	console.log("No item found, creating item");
-        	var highscore = [{name : nameWinner, 'wins': 1}];
-        	HighScores.create({name : nameWinner, 'wins': 1});
+        	var highscore = [{name : nameWinner.myName, 'wins': 1}];
+        	HighScores.create({name : nameWinner.myName, 'wins': 1});
    		}
     	else {
         	highscore[0].wins += 1;
 	        console.log(highscore);
 	    }
 	    numberOfClients = 0;
-	    io.emit('playAgain', highscore);
+	    io.sockets.in(nameWinner.roomNumber).emit('playAgain', highscore);
     });
   });	
 
   socket.on('playerReady', function(){
-  	numberOfClients++;
+    numberOfClients++;
   	console.log(numberOfClients);
-  	if (numberOfClients == 2){
-  		io.emit('bothReady');
-  	}
+    if (numberOfClients % 2 != 0){
+      socket.join(numberOfClients + 1);
+    }
+    else {
+      var tempArray = [];
+      console.log("2 players ready!");
+      rooms = Object.keys(io.sockets.adapter.rooms);
+      for (var i = 0, roomLength = rooms.length; i < roomLength; i++){
+        var temp = parseInt(rooms[i]);
+        if (temp % 2 == 0){
+          tempArray.push(rooms[i]);
+        }
+      }
+      roomToJoin = tempArray[tempArray.length -1];
+      socket.join(roomToJoin);
+      io.sockets.in(roomToJoin).emit('bothReady', roomToJoin);
+    }
   });
 
   socket.on('getHighScores', function(){

@@ -13,10 +13,17 @@ body {
 	justify-content: space-around;
 	color:white;
 }
+#high-score-info {
+	text-align: center;
+}
 button {
 	margin: 2rem;
 	background-color:red;
 	color: white;
+}
+button:hover {
+	cursor:pointer;
+	background-color:DarkRed;
 }
 #game-menu {
     top: 0px;
