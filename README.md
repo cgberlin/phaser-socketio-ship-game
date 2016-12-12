@@ -15,9 +15,7 @@ Instructions Panel        			 |  Ingame Screenshot
 ![](http://i.imgur.com/JP26Hge.png)  |  ![](http://i.imgur.com/AvbP9nk.png)
 
 ## UX
-Right now it will only work in non-mobile or tablet browsers because of the current
-control scheme. I have plans to eventually add a virtual joystick when mobile browsers 
-are detected. 
+Mobile support now up and running. Still a little rough around the edges, but controls are updated and working.
 
 Firing Bullet Screenshot       		 |	   
 :-----------------------------------:|
