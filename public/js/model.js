@@ -2,9 +2,6 @@
 var winH = window.innerHeight;
 var winW = window.innerWidth;
 
-if (winW < 800){
-	alert("Sorry, working on mobile support");
-}
 var socket = io();
 var game,
 	enoughClients = false,
@@ -99,6 +96,7 @@ function create() {
     starfield = game.add.tileSprite(0, 0, 4000, 4000, 'starfield');
    
     game.world.setBounds(0, 0, 4000, 4000);
+    game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
 
     game.input.keyboard.createCursorKeys();
     wasd = {
@@ -152,6 +150,10 @@ function create() {
     enemyBullets.setAll('outOfBoundsKill', true);
     enemyBullets.setAll('checkWorldBounds', true);
     socket.emit('SendOverTheAsteroidData', roomNumber);
+
+    if (winW < 768) {
+    	game.input.onDown.add(mobileMove, this);
+    }
 }
 
 function update() {
@@ -168,6 +170,8 @@ function update() {
         game.physics.arcade.overlap(ship1, asteroids, shipHitAsteroid, null, this);
         game.physics.arcade.overlap(enemyBullets, ship1, enemyKilledYou, null, this);
         game.physics.arcade.overlap(bullets, enemyShip, killedEnemy, null, this);
+
+
 
        	if (wasd.left.isDown) {            
        		if (shipAlive == true) {           //checks to make sure death animation isnt playing before allowing movement and particles
@@ -264,6 +268,12 @@ function enemyKilledYou(){
 	}, 2000);
 }
 
+function mobileMove(ship){
+	game.physics.arcade.moveToPointer(ship1, 300);
+	ship1.rotation = game.physics.arcade.angleToPointer(ship1);
+	fire();
+}
+
 function killedEnemy(){
 	bullets.callAll('kill');
 	randomReset(enemyShip);
@@ -277,7 +287,6 @@ function updateScore(){
 	if (myScore === 5){
 		alert('You win!');
 		socket.emit('winner', {"myName" : myName, "roomNumber" : roomNumber});
-
 	}
 	else if (enemyScore === 5){
 		alert('Enemy Won');
