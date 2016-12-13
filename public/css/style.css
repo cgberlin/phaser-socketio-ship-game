@@ -12,14 +12,22 @@ body {
 	align-items: center;
 	justify-content: space-around;
 	color:white;
+	text-align: center;
 }
 #high-score-info {
 	text-align: center;
 }
 button {
-	margin: 2rem;
-	background-color:red;
-	color: white;
+	text-shadow:none;
+	background-color:#f15a29;
+	border-color:#f15a29;
+	border-style:none;
+	border-radius:4px;
+	width:15rem;
+	margin-top:1rem;
+	padding:1rem 1.5rem;
+	color:white;
+	font-size:1.125rem;
 }
 button:hover {
 	cursor:pointer;

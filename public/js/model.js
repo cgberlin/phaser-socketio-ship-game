@@ -15,6 +15,16 @@ var game,
 	roomNumber;
 
 $('#start-button').on('click', function(){
+	validateStartBox();
+});
+
+$('#name').keydown(function(event){
+	if(event.keyCode == 13){
+		validateStartBox();
+	}
+});
+
+function validateStartBox() {
 	if ($('#name').val() != ''){
 		myName = $('#name').val();
 		$('#main-menu').hide();
@@ -24,7 +34,7 @@ $('#start-button').on('click', function(){
 	else {
 		alert('need a name to play');
 	}
-});
+}
 
 $('#instructions-button').on('click', function(){
 	$('#main-menu').hide();
