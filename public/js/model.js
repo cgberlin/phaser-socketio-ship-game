@@ -161,6 +161,8 @@ function create() {
     enemyBullets.setAll('checkWorldBounds', true);
     socket.emit('SendOverTheAsteroidData', roomNumber);
 
+    groupHold = game.add.group();
+
     if (winW < 768) {
     	game.input.onDown.add(mobileMove, this);
     }
@@ -264,6 +266,7 @@ function bulletHitAsteroid(bullet, asteroid) {
 	asteroid.loadTexture('explosions', 0);
 	asteroid.animations.add('explode');
 	asteroid.animations.play('explode', 7, false, true);
+	groupHold.add(asteroid);
 	setTimeout(function(){asteroid.kill();},2000);
 	bullet.kill();
 }
