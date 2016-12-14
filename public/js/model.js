@@ -91,7 +91,7 @@ function preload() {
   game.load.image('starfield', 'https://raw.githubusercontent.com/jschomay/phaser-demo-game/master/assets/starfield.png');
   game.load.image('ship1', '../assets/ship1.png');
   game.load.image('bullet', '../assets/bullet.png');
-  game.load.image('asteroidMed', '../assets/asteroid-medium.png');
+  game.load.image('asteroidMed', '../assets/asteroid-grey.png');
   game.load.image('laser', '../assets/rain.png');
   game.load.spritesheet('explosions', '../assets/boom.png', 32, 32);
 }
@@ -117,7 +117,7 @@ function create() {
 		  fire : game.input.keyboard.addKey(Phaser.Keyboard.F)
 		};
 
-    asteroids = game.add.group();        
+    asteroids = game.add.group();       
     asteroids.enableBody = true;
     asteroids.physicsBodyType = Phaser.Physics.ARCADE;
 
@@ -261,7 +261,10 @@ function shipHitAsteroid(ship, asteroid){
 }
 
 function bulletHitAsteroid(bullet, asteroid) {
-	asteroid.kill();
+	asteroid.loadTexture('explosions', 0);
+	asteroid.animations.add('explode');
+	asteroid.animations.play('explode', 7, false, true);
+	setTimeout(function(){asteroid.kill();},2000);
 	bullet.kill();
 }
 
@@ -318,6 +321,7 @@ socket.on('enemyBullets', function(bulletLocationInfo){
 
 socket.on('sendAsteroidData', function(data){           //handles all of the asteroid generation using values sent from the server
 	var numberOfAsteroids = data.numberOfAsteroids;
+	var large = 8;
     for (var i = 0; i < numberOfAsteroids; i++){
     	var asteroid = asteroids.create(data.locationValues[i].x, data.locationValues[i].y, 'asteroidMed');
         asteroid.anchor.set(0.5, 0.5);
@@ -327,7 +331,14 @@ socket.on('sendAsteroidData', function(data){           //handles all of the ast
 	    game.physics.arcade.velocityFromRotation(randomAngle, randomVelocity, asteroid.body.velocity);
    		asteroid.body.collideWorldBounds = true;
    		asteroid.body.bounce.setTo(0.9, 0.9);
-    }
+   		if (large > 0){
+   			asteroid.scale.setTo(0.5, 0.5); 
+   			large--;
+   		}
+ 		else {
+ 			asteroid.scale.setTo(0.25, 0.25); 
+ 		}    
+ 	}
 });
 
 socket.on('updateEnemyScore', function(){
