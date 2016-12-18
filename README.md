@@ -3,7 +3,7 @@
 
 Landing Screen        			     |  Waiting Lobby
 :-----------------------------------:|:-----------------------------------:
-![](http://i.imgur.com/ZYKy7DC.png)  |  ![](http://i.imgur.com/SN6VfZu.png)
+![](http://i.imgur.com/qCQuxg6.jpg)  |  ![](http://i.imgur.com/SN6VfZu.png)
 
 ## Introduction
 I built this game as a proof of concept and demonstration for multiplayer gaming
@@ -12,14 +12,14 @@ in your browser to trick the server.
 
 Instructions Panel        			 |  Ingame Screenshot
 :-----------------------------------:|:-----------------------------------:
-![](http://i.imgur.com/JP26Hge.png)  |  ![](http://i.imgur.com/AvbP9nk.png)
+![](http://i.imgur.com/5GxGiAa.jpg)  |  ![](http://i.imgur.com/1C28h7p.jpg)
 
 ## UX
 Mobile support now up and running. Still a little rough around the edges, but controls are updated and working.
 
 Firing Bullet Screenshot       		 |	   
 :-----------------------------------:|
-![](http://i.imgur.com/L7GWzUv.png)  |
+![](http://i.imgur.com/SGpKPsN.jpg)  |
 
 ## Live Site
 You can test and access the game at https://afternoon-caverns-49318.herokuapp.com/
