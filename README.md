@@ -3,7 +3,7 @@
 
 Landing Screen        			     |  Waiting Lobby
 :-----------------------------------:|:-----------------------------------:
-![](http://i.imgur.com/qCQuxg6.jpg)  |  ![](http://i.imgur.com/SN6VfZu.png)
+![](http://i.imgur.com/qCQuxg6.jpg)  |  ![](http://i.imgur.com/SGpKPsN.jpg)
 
 ## Introduction
 I built this game as a proof of concept and demonstration for multiplayer gaming
@@ -16,10 +16,6 @@ Instructions Panel        			 |  Ingame Screenshot
 
 ## UX
 Mobile support now up and running. Still a little rough around the edges, but controls are updated and working.
-
-Firing Bullet Screenshot       		 |	   
-:-----------------------------------:|
-![](http://i.imgur.com/SGpKPsN.jpg)  |
 
 ## Live Site
 You can test and access the game at https://afternoon-caverns-49318.herokuapp.com/
