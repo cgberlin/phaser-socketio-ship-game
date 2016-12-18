@@ -1,18 +1,18 @@
 # 2 Player Asteroid Ships
 ## A multiplayer web game using PhaserJS and Nodejs.
 
-Landing Screen        			     |  Waiting Lobby
+Landing Screen        			     |  Instructions Panel
 :-----------------------------------:|:-----------------------------------:
-![](http://i.imgur.com/qCQuxg6.jpg)  |  ![](http://i.imgur.com/SGpKPsN.jpg)
+![](http://i.imgur.com/qCQuxg6.jpg)  |  ![](http://i.imgur.com/5GxGiAa.jpg)
 
 ## Introduction
 I built this game as a proof of concept and demonstration for multiplayer gaming
 using only socket.io, PhaserJS, nodeJS, and a little bit of jQuery. For testing with yourself you can just open two tabs
 in your browser to trick the server. 
 
-Instructions Panel        			 |  Ingame Screenshot
+Ingame Screenshot        			 |  Ingame Screenshot
 :-----------------------------------:|:-----------------------------------:
-![](http://i.imgur.com/5GxGiAa.jpg)  |  ![](http://i.imgur.com/1C28h7p.jpg)
+![](http://i.imgur.com/SGpKPsN.jpg)  |  ![](http://i.imgur.com/1C28h7p.jpg)
 
 ## UX
 Mobile support now up and running. Still a little rough around the edges, but controls are updated and working.
