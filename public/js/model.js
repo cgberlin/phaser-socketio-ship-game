@@ -1,4 +1,3 @@
-
 var winH = window.innerHeight;
 var winW = window.innerWidth;
 
